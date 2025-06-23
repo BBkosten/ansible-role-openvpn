@@ -1,0 +1,149 @@
+---
+# Creating Clients on server side
+
+- name: "OpenVPN {{ openvpn_role }} | easy-rsa build-client-full client nopass"
+  ansible.builtin.command:
+    cmd: "{{ openvpn_easyrsa_dir }}/easyrsa build-client-full {{ item }} nopass"
+    chdir: "{{ openvpn_dir }}/easy-rsa"
+    creates: "{{ openvpn_dir }}/easy-rsa/pki/issued/{{ item }}.crt"
+  with_items:
+    - "{{ openvpn_clients }}" 
+  environment:
+    EASYRSA_BATCH: "yes"
+
+
+# Copy clients files 
+- name: "OpenVPN | copy clients-crt files to {{ openvpn_dir }}/server"
+  ansible.builtin.copy:
+    src: "{{ openvpn_dir }}/easy-rsa/pki/issued/{{ item }}.crt"
+    dest: "{{ openvpn_dir }}/server/{{ item }}.crt"
+    mode: "0644"
+    remote_src: true
+  with_items:
+    - "{{ openvpn_clients }}"
+
+- name: "OpenVPN | copy clients-key files to {{ openvpn_dir }}/server"
+  ansible.builtin.copy:
+    src: "{{ openvpn_dir }}/easy-rsa/pki/private/{{ item }}.key"
+    dest: "{{ openvpn_dir }}/server/{{ item }}.key"
+    mode: "0644"
+    remote_src: true
+  with_items:
+    - "{{ openvpn_clients }}"
+
+
+- name: "OpenVPN {{ openvpn_role }} | ensure {{ openvpn_dir }}/client exists"
+  ansible.builtin.file:
+    path: "{{ openvpn_dir }}/client"
+    state: directory
+    owner: root
+    group: "{{ openvpn_group }}"
+    mode: "0750"
+
+
+- name: "OpenVPN {{ openvpn_role }} | copy files to {{ openvpn_dir }}/client"
+  ansible.builtin.copy:
+    src: "{{ openvpn_dir }}/easy-rsa/pki/{{ item }}"
+    dest: "{{ openvpn_dir }}/client/{{ item | basename }}"
+    mode: "0644"
+    remote_src: true
+  loop: # Либо with_item
+    - ca.crt
+    - ta.key
+
+- name: "OpenVPN {{ openvpn_role }} | copy clients-crt files to {{ openvpn_dir }}/client"
+  ansible.builtin.copy:
+    src: "{{ openvpn_dir }}/easy-rsa/pki/issued/{{ item }}.crt"
+    dest: "{{ openvpn_dir }}/client/{{ item }}.crt"
+    mode: "0644"
+    remote_src: true
+  with_items:
+    - "{{ openvpn_clients }}"
+
+- name: "OpenVPN {{ openvpn_role }} | copy clients-key files to {{ openvpn_dir }}/client"
+  ansible.builtin.copy:
+    src: "{{ openvpn_dir }}/easy-rsa/pki/private/{{ item }}.key"
+    dest: "{{ openvpn_dir }}/client/{{ item }}.key"
+    mode: "0644"
+    remote_src: true
+  with_items:
+    - "{{ openvpn_clients }}"
+
+
+
+#Generate and Get client's configs. 
+
+
+- name: "OpenVPN {{ openvpn_role }} | Register .ca and clients .crt and .key and create client's config and get configs" 
+  when: for_mobile == true
+  block:
+    - name: "OpenVPN | Register ca.crt"
+      ansible.builtin.slurp: # Так же можно использовать другой модуль Fetch. Так мы прочитаем наши файлы ключей, сертификатов и т.д.
+        src: "{{ openvpn_dir }}/ca.crt"
+      register: openvpn_ca_cert
+    
+    - name: "OpenVPN | Register ta.key"
+      ansible.builtin.slurp:
+        src: "{{ openvpn_dir }}/ta.key"
+      register: openvpn_tls_auth
+
+
+    - name: "OpenVPN | Register client keys"
+      ansible.builtin.slurp:
+        src: "{{ openvpn_dir }}/client/{{ item }}.key"
+      with_items:
+        - "{{ openvpn_clients }}"
+      register: openvpn_client_keys
+
+
+    - name: "OpenVPN | Register client certs"
+      ansible.builtin.slurp:
+        src: "{{ openvpn_dir }}/client/{{ item }}.crt"
+      with_items:
+        - "{{ openvpn_clients }}"
+      register: openvpn_client_certs
+
+
+    - name: OpenVPN | Generate client config with cert's and keys.
+      template:
+        src: client.ovpn.j2
+        dest: "{{ openvpn_dir }}/client/{{ item.0.item }}-{{ inventory_hostname }}.ovpn"
+        owner: root
+        group: root
+        mode: "0640"
+      with_together: # Эта штука позволяет использовать сразу несколько items  в отличии от with_items
+        - "{{ openvpn_client_certs.results }}"
+        - "{{ openvpn_client_keys.results }}"
+
+    - name: OpenVPN | Get client's config with cert's and keys.
+      fetch: # Используем модуль фетч который скачает файлы с удаленной машины к нам. И так же будем генерить в цикле эти файлы, ибо у нас может быть несколько пользунов.
+        src: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
+        dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-{{ item }}.ovpn"
+        flat: true
+      with_items:
+        - "{{ openvpn_clients }}"
+
+
+
+- name: OpenVPN | Generate client config without cert's and keys.
+  template:
+    src: client.ovpn.j2
+    dest: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
+    owner: root
+    group: root
+    mode: "0640"
+  #register: rendered_configs
+  with_items:
+    - "{{ openvpn_clients }}"
+  when: for_mobile != true
+  #check_mode: yes  # Чтобы не писать на диск
+
+
+- name: OpenVPN | Get client's config without cert's and keys.
+  fetch: 
+    src: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
+    dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-{{ item }}.ovpn" 
+    flat: true
+  with_items:
+    - "{{ openvpn_clients }}"
+  when: for_mobile != true

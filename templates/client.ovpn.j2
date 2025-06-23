@@ -1,0 +1,40 @@
+{{ ansible_managed | comment }}
+
+client
+
+tls-client
+dev tun
+proto {{openvpn_proto}}
+remote {{ openvpn_network }} {{openvpn_port}}
+resolv-retry infinite
+nobind
+
+#dhcp-option DNS 8.8.8.8
+
+#pull
+#route-nopull
+#route 172.24.0.0 255.255.0.0
+#route
+
+persist-key
+persist-tun
+
+auth SHA256
+data-ciphers {{ openvpn_cipher }}
+remote-cert-tls server
+
+#tls-auth "ta.key" 1 #Пока оставил, работает и так. Но можно включить tls-crypt 
+;user nobody
+;group nobody
+
+keepalive {{ openvpn_keepalive }}
+comp-lzo #используется при udp
+verb 3
+
+{% if for_mobile and openvpn_role == "server" %}
+  {% include 'mobile_client.j2' %}
+{% else %}
+  {% include 'pc_client.j2' %}
+{% endif %}
+
+

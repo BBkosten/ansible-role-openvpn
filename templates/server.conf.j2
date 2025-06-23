@@ -1,0 +1,57 @@
+{{ ansible_managed | comment }}
+
+port {{ openvpn_port }}
+proto {{ openvpn_proto }} # протокол может быт и tcp-server, если есть необходимость в этом
+dev tun
+
+ca {{ openvpn_dir }}/server/ca.crt
+cert {{ openvpn_dir }}/server/server.crt
+key {{ openvpn_dir }}/server/server.key
+dh {{ openvpn_dir }}/server/dh.pem
+
+
+auth SHA512   # выбор алгоритма шифрования для аутентификации
+data-ciphers AES-256-GCM:AES-128-GCM # С версии опенвпн 2.5 изменилась запись.
+#cipher AES-256-CBC # выбор алгоритма шифрования всех передаваемых через vpn данных
+#ls-version-min 1.2 # ограничиваем минимальную версию протокола tls
+#ls-crypt tc.key # ключ для шифрования TLS control channel
+
+server {{openvpn_network}} {{openvpn_netmask}} # подсеть для туннеля, может быть любой
+
+ifconfig-pool-persist ipp.txt # файл с записями соответствий clinet - ip
+remote-cert-eku "TLS Web Client Authentication"
+
+push "redirect-gateway def1" # Заворачиваем весь траффик в туннель. Поправил после того как перестал работать тикток к Ани.
+#push “redirect-gateway def1 bypass-dhcp”
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+push "dhcp-option DNS 8.8.8.8"
+
+client-to-client # позволяет клиентам openvpn подключаться друг к другу
+#lient-config-dir /etc/openvpn/ccd # директория с индивидуальными настройками клиентов
+
+keepalive 10 120
+tls-server
+#tls-auth {{ openvpn_dir }}/server/ta.key 0 #Заменил на tls-crypt, вроде как стабильней нет проблем с гуи и свежее. Так же сам определяет направление 0 1
+tls-crypt {{ openvpn_dir }}/server/ta.key
+
+comp-lzo # если используется протокол tcp, сжатие надо отключить #Отрубил, когда включил tcp
+explicit-exit-notify 1 # если используется протокол tcp, поменять на 0 #Отрубил, когда включил tcp
+persist-key
+persist-tun
+
+
+user nobody
+group {{ openvpn_group }}
+max-clients 5
+
+#group nobody #Для CentOS была включена. На Ubuntu нет такой группые, есть nogroup.
+
+verb 3
+
+status /var/log/openvpn/openvpn-status.log
+#status-version 1
+log /var/log/openvpn/openvpn.log
+#log-append /var/log/openvpn/openvpn.log
+#script-security 1
+#explicit-exit-notify 1

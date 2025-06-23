@@ -1,0 +1,64 @@
+---
+# tasks file for ansible-role-openvpn
+
+# - name: "OpenVPN {{ openvpn_role }} | Only create users" 
+#   when: wants_only_create_clients == true 
+#   block:
+
+# This task can be work only if you run it on the server with OpenVPN installed/
+- name: "OpenVPN {{ openvpn_role }} | Only create users"
+  ansible.builtin.include_tasks:
+    file: create_clients.yml
+  when: wants_only_create_clients == true
+    
+
+#install apps and network
+- name: "OpenVPN {{ openvpn_role }} | Update cache for different system" 
+  when: wants_only_create_clients != true 
+  block:
+    - name: OpenVPN {{ openvpn_role }} | Обновление apt кэша (только для Debian)
+      ansible.builtin.apt:
+        update_cache: true
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: OpenVPN {{ openvpn_role }} | Обновление apt кэша (только для CentOS)
+      ansible.builtin.dnf:
+        update_cache: true
+      when: ansible_facts['os_family'] == "RedHat"
+
+
+    - name: OpenVPN {{ openvpn_role }} | Install openvpn packages
+      ansible.builtin.package:
+        name: "{{ openvpn_packages }}"
+        state: present
+        #update_cache: yes #Сработает в ansible.builtin.package только для Debian систем, поэтому выше делаю отдельно.
+      notify:
+        - enable openvpn
+    
+    - name: OpenVPN {{ openvpn_role }} | Setup openvpn server or client
+      ansible.builtin.include_tasks:
+        file: "{{ openvpn_role }}.yml"
+
+
+
+
+
+
+
+  
+
+
+# - name: Import assert.yml
+#   ansible.builtin.import_tasks:
+#     file: assert.yml
+#   run_once: true
+#   delegate_to: localhost
+
+
+# - name: Get OS Family
+#   ansible.builtin.set_fact:
+#   os_type: "{{ ansible_facts['os_family'] }}" # 'Debian' или 'RedHat'
+
+# - name: Restart the system if the temperature is too high
+#   when: os_type | Debian
+#   shell: "reboot"

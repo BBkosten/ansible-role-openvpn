@@ -1,0 +1,3 @@
+[defaults]
+remote_tmp = /tmp/.ansible/tmp
+roles_path = ./roles

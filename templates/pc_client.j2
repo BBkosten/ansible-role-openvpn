@@ -1,0 +1,6 @@
+
+tls-crypt "{{ openvpn_dir }}/client/ta.key"   #Заменил tls-auth, вроде как стабильней нет проблем с гуи и свежее. Так же сам определяет направление 0 1
+
+ca "{{ openvpn_dir }}/client/ca.crt"
+cert "{{ openvpn_dir }}/client/{{ item }}.crt
+key "{{ openvpn_dir }}/client/{{ item }}.key

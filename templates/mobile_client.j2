@@ -1,0 +1,18 @@
+
+<ca>
+{{ openvpn_ca_cert.content | b64decode }} #Как в bash base64 -d
+</ca>
+
+
+<tls-auth>
+{{ openvpn_tls_auth.content | b64decode }}
+</tls-auth>
+
+<cert>
+{{ item.0.content | b64decode }}
+</cert>
+
+
+<key>
+{{ item.1.content | b64decode }}
+</key>

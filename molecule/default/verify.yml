@@ -1,0 +1,6 @@
+- name: Verify
+  hosts: all
+  tasks:
+    - name: "Include ansible-role-openvpn"
+      include_role:
+        name: "ansible-role-openvpn"

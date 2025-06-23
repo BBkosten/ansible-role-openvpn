@@ -1,0 +1,29 @@
+---
+# defaults file for ansible-role-openvpn
+
+#Activate one of these options (for_mobile or for_pc and comment or uncomment mobile_client and pc_client respectively) to generate an .ovpn file with keys inside (mobile) or with only the key path. 
+for_mobile: true
+
+wants_only_create_clients: false  # This task can be work only if you run it on the server with OpenVPN installed/
+
+openvpn_role: server
+wants_cteate_clients: true
+
+
+openvpn_clients:
+  - che_rf
+  - che_mobile_rf
+  - anya_mobile_rf
+  - anya_mac_rf
+
+openvpn_dir: "/etc/openvpn"
+openvpn_port: "3212"
+openvpn_proto: "udp"
+openvpn_network: "10.8.24.0"
+openvpn_netmask: "255.255.255.0"
+openvpn_cipher: "AES-256-GCM:AES-128-GCM"
+openvpn_keepalive: "10 120"
+
+#openvpn_address: "{{ ansible_default_ipv4.address }}" # Эту переменную берем из ансибл фактс в данном случае команда ansible -i inventories/vagrant/hosts vpn -m setup
+
+

@@ -1,0 +1,30 @@
+---
+
+# tasks for client-side
+
+- name: "OpenVPN {{ openvpn_role }} | ensure {{ openvpn_dir }}/client exists"
+  ansible.builtin.file:
+    path: "{{ openvpn_dir }}/client"
+    state: directory
+    owner: root
+    group: "{{ openvpn_group }}"
+    mode: "0750"
+
+- name: OpenVPN {{ openvpn_role }} | Generate client config without cert's and keys.
+  template:
+    src: client.ovpn.j2
+    dest: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
+    owner: root
+    group: root
+    mode: "0640"
+  with_items:
+    - "{{ openvpn_clients }}"
+  #when: for_mobile == false
+
+
+
+
+
+
+
+
