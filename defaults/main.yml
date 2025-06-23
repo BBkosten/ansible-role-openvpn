@@ -1,7 +1,7 @@
 ---
 # defaults file for ansible-role-openvpn
 
-#Activate one of these options (for_mobile or for_pc and comment or uncomment mobile_client and pc_client respectively) to generate an .ovpn file with keys inside (mobile) or with only the key path. 
+#Activate this options (true) for generate an .ovpn file with keys inside (mobile) or with only the key path (false). 
 for_mobile: true
 
 wants_only_create_clients: false  # This task can be work only if you run it on the server with OpenVPN installed/
