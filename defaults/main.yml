@@ -1,19 +1,30 @@
 ---
 # defaults file for ansible-role-openvpn
 
-#Activate this options (true) for generate an .ovpn file with keys inside (mobile) or with only the key path (false). 
-for_mobile: true
+# THIS OPTION REALLY IMPORTANT!!! 
+#openvpn_role, wants_cteate_clients, for_mobile and wants_only_create_clients
+#READ THE DESCRIPTION!
 
-wants_only_create_clients: false  # This task can be work only if you run it on the server with OpenVPN installed/
 
+#Activate this options (true) if you want to generate an .ovpn file with keys, .crt, .ta, e.t.c. inside (for example for mobile). 
+#Turn this option false if you want to generate .ovpn file with only the file's paths, and get .ovpn, ca.crt, ta.key, client.crt, client.key
+for_mobile: false
+
+#Activate this options (true) if you want only create user. 
+wants_only_create_clients: false  # This task can be work only if you run it on the server with OpenVPN server installed/
+
+#Choose the role. Server or client. If you choose Server - will be installed openVPN server. If you choose Client - will be installed openVPN client.
 openvpn_role: server
+
+#If you want to create clients and generate and get their config's turn this option true. If this option will be off, client's not be created. Will be only installed openVPN server or client.
 wants_cteate_clients: true
 
-
+#Write the client's names.
 openvpn_clients:
-  - client1
-  - client2
-  - client3
+  - che_rf
+  - che_mobile_rf
+  - anya_mobile_rf
+  - anya_mac_rf
 
 openvpn_dir: "/etc/openvpn"
 openvpn_port: "3212"
@@ -23,6 +34,5 @@ openvpn_netmask: "255.255.255.0"
 openvpn_cipher: "AES-256-GCM:AES-128-GCM"
 openvpn_keepalive: "10 120"
 
-#openvpn_address: "{{ ansible_default_ipv4.address }}" # Эту переменную берем из ансибл фактс в данном случае команда ansible -i inventories/vagrant/hosts vpn -m setup
-
+#openvpn_address: "{{ ansible_default_ipv4.address }}"
 
