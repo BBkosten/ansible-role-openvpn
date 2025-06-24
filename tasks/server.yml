@@ -50,7 +50,7 @@
 
 
 
-# - name: OpenVPN | Create vars file
+# - name: OpenVPN {{ openvpn_role }} | Create vars file
 #   copy:
 #     dest: "{{ openvpn_easyrsa_dir }}/vars"
 #     content: |
@@ -63,7 +63,7 @@
   ansible.builtin.command:
     cmd: "{{ openvpn_easyrsa_dir }}/easyrsa init-pki"
     chdir: "{{ openvpn_dir }}/easy-rsa"
-    creates: "{{ openvpn_dir }}/easy-rsa/pki" # - Позволяет сказать, что эта команда произвела.
+    creates: "{{ openvpn_dir }}/easy-rsa/pki" # - Позволяет сказать, что эта команда произвела. Гарантирует, что не будет запускаться повторно, если это уже есть.
 
 
 - name: "OpenVPN {{ openvpn_role }} | easy-rsa build-ca" # Создаем CA без пароля, если не существует

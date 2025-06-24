@@ -104,8 +104,8 @@
       register: openvpn_client_certs
 
 
-    - name: OpenVPN | Generate client config with cert's and keys.
-      template:
+    - name: OpenVPN {{ openvpn_role }} | Generate client config with cert's and keys.
+      ansible.builtin.template:
         src: client.ovpn.j2
         dest: "{{ openvpn_dir }}/client/{{ item.0.item }}-{{ inventory_hostname }}.ovpn"
         owner: root
@@ -115,22 +115,40 @@
         - "{{ openvpn_client_certs.results }}"
         - "{{ openvpn_client_keys.results }}"
 
-    - name: OpenVPN | Get client's config with cert's and keys.
-      fetch: # Используем модуль фетч который скачает файлы с удаленной машины к нам. И так же будем генерить в цикле эти файлы, ибо у нас может быть несколько пользунов.
+# Refactoring with_together: to loop:
+    # - name: OpenVPN {{ openvpn_role }} | Generate client config with cert's and keys.
+    #   ansible.builtin.template:
+    #     src: client.ovpn.j2
+    #     dest: "{{ openvpn_dir }}/client/{{ item.0.item }}-{{ inventory_hostname }}.ovpn"
+    #     owner: root
+    #     group: root
+    #     mode: "0640"
+    #   loop: "{{ openvpn_client_certs.results | zip(openvpn_client_keys.results) | list }}"
+
+
+    - name: OpenVPN {{ openvpn_role }} | Get client's config with cert's and keys.
+      ansible.builtin.fetch: # Используем модуль фетч который скачает файлы с удаленной машины к нам. И так же будем генерить в цикле эти файлы, ибо у нас может быть несколько пользунов.
         src: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
         dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-{{ item }}.ovpn"
         flat: true
       with_items:
         - "{{ openvpn_clients }}"
-
+        
+# Refactoring with_items: to loop:
+    # - name: OpenVPN {{ openvpn_role }} | Get client's config with cert's and keys.
+    #   ansible.builtin.fetch:
+    #     src: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
+    #     dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-{{ item }}.ovpn"
+    #     flat: true
+    #   loop: "{{ openvpn_clients }}"
 
 
 
 - name: "OpenVPN {{ openvpn_role }} | Generate client config without cert's and keys. Get configs and keys, serts." 
   when: for_mobile != true
   block:
-    - name: OpenVPN | Generate client config without cert's and keys.
-      template:
+    - name: OpenVPN {{ openvpn_role }} | Generate client config without cert's and keys.
+      ansible.builtin.template:
         src: client.ovpn.j2
         dest: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
         owner: root
@@ -142,8 +160,8 @@
       #check_mode: yes  # Чтобы не писать на диск
 
 
-    - name: OpenVPN | Get client's config without cert's and keys.
-      fetch: 
+    - name: OpenVPN {{ openvpn_role }} | Get client's config without cert's and keys.
+      ansible.builtin.fetch: 
         src: "{{ openvpn_dir }}/client/{{ item }}-{{ inventory_hostname }}.ovpn"
         dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-{{ item }}.ovpn" 
         flat: true
@@ -151,8 +169,8 @@
         - "{{ openvpn_clients }}"
 
 
-    - name: OpenVPN | Get server cert.
-      fetch: 
+    - name: OpenVPN {{ openvpn_role }} | Get server cert.
+      ansible.builtin.fetch: 
         src: "{{ openvpn_dir }}/ca.crt"
         dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-ca.crt" 
         flat: true
@@ -160,8 +178,8 @@
         - "{{ openvpn_clients }}"
 
 
-    - name: OpenVPN | Get ta key.
-      fetch: 
+    - name: OpenVPN {{ openvpn_role }} | Get ta key.
+      ansible.builtin.fetch: 
         src: "{{ openvpn_dir }}/ta.key"
         dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-ta.key" 
         flat: true
@@ -169,8 +187,8 @@
         - "{{ openvpn_clients }}"
 
 
-    - name: OpenVPN | Get client's keys.
-      fetch: 
+    - name: OpenVPN {{ openvpn_role }} | Get client's keys.
+      ansible.builtin.fetch: 
         src: "{{ openvpn_dir }}/client/{{ item }}.key"
         dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-{{ item }}.key" 
         flat: true
@@ -178,8 +196,8 @@
         - "{{ openvpn_clients }}"
 
 
-    - name: OpenVPN | Get client's crt.
-      fetch: 
+    - name: OpenVPN {{ openvpn_role }} | Get client's crt.
+      ansible.builtin.fetch: 
         src: "{{ openvpn_dir }}/client/{{ item }}.crt"
         dest: "{{ playbook_dir }}/ovpn/{{ inventory_hostname }}-{{ item }}.crt" 
         flat: true
