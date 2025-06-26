@@ -1,17 +1,32 @@
 ---
 # vars file for ansible-role-openvpn
 
+# _openvpn_packages:
+#   server:
+#     - openvpn
+#     - easy-rsa
+#     - iptables
+#     - iptables-persistent
+#   client:
+#     - openvpn
+
+# openvpn_packages: "{{ _openvpn_packages[openvpn_role] }}"
+
 _openvpn_packages:
   server:
-    - openvpn
-    - easy-rsa
-    - iptables
-    - iptables-persistent
+    Debian:
+      - openvpn
+      - easy-rsa
+      - iptables
+      - iptables-persistent
+    RedHat:
+      - openvpn
+      - easy-rsa
+      - iptables
   client:
     - openvpn
 
-openvpn_packages: "{{ _openvpn_packages[openvpn_role] }}"
-
+openvpn_packages: "{{ _openvpn_packages[openvpn_role][ansible_os_family] }}"
 
 _openvpn_service:
   server:
@@ -32,7 +47,8 @@ openvpn_service: "{{ _openvpn_service[openvpn_role][ansible_os_family] | default
 _openvpn_group:
   default: nogroup
   Debian: nogroup
-  CentOS: nobody 
+  CentOS: nobody
+  RedHat: nobody 
   #RedHat-7: openvpn
 
 openvpn_group: "{{ _openvpn_group[ansible_os_family] | default(_openvpn_group['default']) }}"
@@ -43,6 +59,6 @@ _openvpn_easyrsa_path:
   default: /usr/share/easy-rsa/3
   Debian: /usr/share/easy-rsa
 
-openvpn_easyrsa_dir: "{{ _openvpn_easyrsa_path[ansible_os_family] | default(_openvpn_easyrsa_path['default']) }}"
+openvpn_easyrsa_dir: "{{ _openvpn_easyrsa_dir[ansible_os_family] | default(_openvpn_easyrsa_path['default']) }}"
 
 
