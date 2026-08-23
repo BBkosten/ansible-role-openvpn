@@ -16,6 +16,7 @@
 - name: "OpenVPN {{ openvpn_role }} | Get default interface"
   ansible.builtin.set_fact:
     vpn_server_out_interface: "{{ ansible_default_ipv4.interface }}"
+    vpn_server_address: "{{ ansible_default_ipv4.address }}"
 
 
 - name: "OpenVPN {{ openvpn_role }} | Create IPTables NAT Chain"
