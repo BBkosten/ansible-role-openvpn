@@ -137,7 +137,7 @@
 - name: "OpenVPN {{ openvpn_role }} | place server.conf"
   ansible.builtin.template:
     src: server.conf.j2
-    dest: "{{ openvpn_dir }}/server.conf"
+    dest: "{{ openvpn_dir }}/server/server.conf"
     owner: root
     group: root
     mode: "0644"
