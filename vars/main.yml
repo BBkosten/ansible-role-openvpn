@@ -30,18 +30,18 @@ openvpn_packages: "{{ _openvpn_packages[openvpn_role][ansible_os_family] }}"
 
 _openvpn_service:
   server:
-    default: openvpn@server
+    default: openvpn-server@server #openvpn@server
     #RedHat-7: openvpn@server
     CentOS: openvpn-server@server
-    Debian: openvpn
+    Debian: openvpn-server@server #openvpn
   client:
-    default: openvpn@client
+    default: openvpn-client@client #openvpn@client
     #RedHat-7: openvpn@client
     CentOS: openvpn-client@client
-    Debian: openvpn
+    Debian: openvpn-client@client #openvpn
 
 #openvpn_service: "{{ _openvpn_service[openvpn_role][ansible_os_family ~ '-' ~ ansible_distribution_major_version] | default(_openvpn_service[openvpn_role][ansible_os_family] | default(_openvpn_service[openvpn_role]['default'] )) }}"
-openvpn_service: "{{ _openvpn_service[openvpn_role][ansible_os_family] | default(_openvpn_service[openvpn_role]['default'] ) }}"
+openvpn_service: "{{ _openvpn_service[openvpn_role][ansible_os_family] | default(_openvpn_service[openvpn_role]['default']) }}"
 
 
 _openvpn_group:
