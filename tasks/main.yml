@@ -37,6 +37,7 @@
       ansible.builtin.package:
         name: "{{ openvpn_packages }}"
         state: present
+        lock_timeout: 300
         #update_cache: yes #Сработает в ansible.builtin.package только для Debian систем, поэтому выше делаю отдельно.
       notify:
         - enable openvpn
