@@ -90,7 +90,7 @@
     - name: "OpenVPN | Register ta.key"
       ansible.builtin.slurp:
         src: "{{ openvpn_dir }}/ta.key"
-      register: openvpn_tls_auth
+      register: openvpn_tls_crypt
 
 
     - name: "OpenVPN | Register client keys"
