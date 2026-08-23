@@ -28,7 +28,7 @@ openvpn_clients:
 openvpn_dir: "/etc/openvpn"
 openvpn_port: "3212"
 openvpn_proto: "udp"
-openvpn_network: "10.8.24.0"
+openvpn_network: "10.8.24.0/24"
 openvpn_netmask: "255.255.255.0"
 openvpn_cipher: "AES-256-GCM:AES-128-GCM"
 openvpn_keepalive: "10 120"
