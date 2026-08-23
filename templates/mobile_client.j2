@@ -4,9 +4,9 @@
 </ca>
 
 
-<tls-auth>
-{{ openvpn_tls_auth.content | b64decode }}
-</tls-auth>
+<tls-crypt>
+{{ openvpn_tls_crypt.content | b64decode }}
+</tls-crypt>
 
 <cert>
 {{ item.0.content | b64decode }}
