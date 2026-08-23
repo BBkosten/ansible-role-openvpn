@@ -56,7 +56,7 @@ openvpn_group: "{{ _openvpn_group[ansible_os_family] | default(_openvpn_group['d
 
 
 _openvpn_easyrsa_path:
-  default: /usr/share/easy-rsa/3
+  default: /usr/share/easy-rsa # on Ubuntu 24.04 working without /3 - path like on debian
   Debian: /usr/share/easy-rsa
 
 openvpn_easyrsa_dir: "{{ _openvpn_easyrsa_dir[ansible_os_family] | default(_openvpn_easyrsa_path['default']) }}"
