@@ -5,7 +5,7 @@ client
 tls-client
 dev tun
 proto {{openvpn_proto}}
-remote {{ openvpn_network }} {{openvpn_port}}
+remote {{ vpn_server_address }} {{openvpn_port}}
 resolv-retry infinite
 nobind
 
