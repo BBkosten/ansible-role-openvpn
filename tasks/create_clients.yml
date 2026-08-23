@@ -71,7 +71,12 @@
 
 
 
-#Generate and Get client's configs. 
+#Generate and Get client's configs. \
+
+#Temporary edded for get the server ip address
+- name: "OpenVPN {{ openvpn_role }} | Get default interface"
+  ansible.builtin.set_fact:
+    vpn_server_address: "{{ ansible_default_ipv4.address }}"
 
 
 - name: "OpenVPN {{ openvpn_role }} | Register .ca and clients .crt and .key and create client's config and get configs" 
